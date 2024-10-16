@@ -9,18 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@imgly/background-removal": "^1.5.5",
+    "@imgly/background-removal-node": "^1.4.5",
+    "antd": "^5.21.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.0.0",
+    "mini-svg-data-uri": "^1.4.4",
+    "next": "14.2.15",
+    "random-word-slugs": "^0.1.7",
     "react": "^18",
+    "react-color": "^2.19.3",
+    "react-compare-slider": "^3.1.0",
     "react-dom": "^18",
-    "next": "14.2.15"
+    "react-responsive": "^10.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.15",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.15"
+    "typescript": "^5"
   }
 }
