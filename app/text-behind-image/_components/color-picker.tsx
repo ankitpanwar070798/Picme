@@ -1,13 +1,13 @@
 import React from 'react';
 import { Button, Dropdown, Tabs, Menu, Row, Col } from 'antd';
-import { ChromePicker } from 'react-color';
+import { ChromePicker, ColorResult } from 'react-color';
 import { colors } from './colors';
 
 interface ColorPickerProps {
   attribute: string;
   label: string;
   currentColor: string;
-  handleAttributeChange: (attribute: string, value: any) => void;
+  handleAttributeChange: (attribute: string, value: string) => void; // Ensure the value is a string
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
@@ -23,7 +23,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
           <Tabs.TabPane tab="🎨" key="colorPicker">
             <ChromePicker
               color={currentColor}
-              onChange={(color:any) => handleAttributeChange(attribute, color.hex)}
+              onChange={(color: ColorResult) => handleAttributeChange(attribute, color.hex)}
             />
           </Tabs.TabPane>
           <Tabs.TabPane tab="⚡️" key="suggestions">
@@ -53,7 +53,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <label htmlFor={attribute}>{label}</label>
       <Dropdown overlay={menu} trigger={['click']} placement="bottomLeft">
-        <Button style={{width:'fit-content'}}>
+        <Button style={{ width: 'fit-content' }}>
           <div
             style={{
               backgroundColor: currentColor,
@@ -61,7 +61,8 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
               height: '24px',
               borderRadius: '4px',
               marginRight: '8px',
-              border:'1px solid #ccc0c0'
+              border: '1px solid #ccc0c0',
+              display: 'inline-block',
             }}
           />
           {currentColor}
