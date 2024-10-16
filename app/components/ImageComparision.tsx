@@ -12,10 +12,6 @@ interface ImagesMap {
 }
 
 const imagesMap: ImagesMap = {
-  People: {
-    before: '/boy-bg.jpg', 
-    after: '/boy.png', 
-  },
   Products: {
     before: '/headphone-bg.jpg',
     after: '/headphone.png',
@@ -24,15 +20,10 @@ const imagesMap: ImagesMap = {
     before: '/wolf-bg.jpg',
     after: '/wolf.png',
   },
-  Cars: {
-    before: '/car-bg.jpg',
-    after: '/car.png',
-  },
-
 };
 
 const ImageComparision: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<string>('People');
+  const [activeCategory, setActiveCategory] = useState<string>('Products');
   const [currentImages, setCurrentImages] = useState<Images>(imagesMap[activeCategory]);
 
   const handleCategoryChange = (category: string) => {

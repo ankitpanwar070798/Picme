@@ -9,15 +9,12 @@ import {
   Col,
   Divider,
   Collapse,
-  Image as AntImage,
-  Modal,
+  Image as AntImage
 } from "antd";
 import {
   PlusOutlined,
-  ArrowLeftOutlined,
   DownloadOutlined,
-  BulbOutlined,
-  ShareAltOutlined,
+  InstagramOutlined,
 } from "@ant-design/icons";
 import { removeBackground } from "@imgly/background-removal";
 import TextCustomizer from "./_components/text-customizer";
@@ -50,9 +47,8 @@ const Page = () => {
     null
   );
   const [textSets, setTextSets] = useState<TextSet[]>([]);
-  const [isPreviewVisible, setIsPreviewVisible] = useState<boolean>(false);
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -114,7 +110,7 @@ const Page = () => {
   const saveCompositeImage = () => {
     if (!canvasRef.current || !isImageSetupDone) return;
 
-    setIsDownloading(true); // Disable button at the start of download
+    setIsDownloading(true);
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -123,7 +119,7 @@ const Page = () => {
       return;
     }
 
-    const bgImg = new Image();
+    const bgImg = document.createElement("img");
     bgImg.crossOrigin = "anonymous";
     bgImg.onload = () => {
       canvas.width = bgImg.naturalWidth;
@@ -151,7 +147,7 @@ const Page = () => {
       });
 
       if (removedBgImageUrl) {
-        const removedBgImg = new Image();
+        const removedBgImg = document.createElement("img");
         removedBgImg.crossOrigin = "anonymous";
         removedBgImg.onload = () => {
           ctx.drawImage(removedBgImg, 0, 0, canvas.width, canvas.height);
@@ -162,18 +158,26 @@ const Page = () => {
         triggerDownload();
       }
     };
+    bgImg.onerror = () => {
+      setIsDownloading(false);
+    };
     bgImg.src = selectedImage || "";
 
     function triggerDownload() {
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.download = "text-behind-image.png";
-      link.href = dataUrl;
-      link.click();
-
-      setIsDownloading(false); // Re-enable button after download is complete
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = "text-behind-image.png";
+        link.href = dataUrl;
+        link.click();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsDownloading(false);
+      }
     }
   };
+
   const downloadRemovedBgImage = () => {
     if (removedBgImageUrl) {
       const link = document.createElement("a");
@@ -183,27 +187,16 @@ const Page = () => {
     }
   };
 
-  const handleShareWithImage = () => {};
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-      }}
-    >
-      <Row
-        justify="space-between"
-        align="middle"
-        style={{ padding: "20px 40px" }}
-      >
-        <Link href="/" className="font-bold text-2xl text-lg flex items-center">
-          <BulbOutlined className="bg-gradient-to-tr border-secondary from-primary via-primary to-primary rounded-lg w-9 p-2 h-9 mr-2 border text-white" />
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", gap: "10px" }}>
+      <Row justify="space-between" align="middle" style={{ padding: "20px 40px" }}>
+        <Link href="/" className="font-bold text-2xl text-lg flex items-center text-black hover:text-black">
           Pic<span className="bg-[#9CA986] text-white px-1 rounded">me</span>
         </Link>
-        <Col>
+        <Col className="flex items-center">
+        <Link href="https://www.instagram.com/ankitpanwar07/" target="_blank" className="font-bold text-2xl text-lg flex items-center text-black hover:text-black">
+        <InstagramOutlined style={{ fontSize: '28px', color: '#9ca986', marginRight: '10px' }} />
+        </Link>
           <Upload
             ref={fileInputRef}
             accept=".jpg, .jpeg, .png"
@@ -223,236 +216,27 @@ const Page = () => {
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
       {selectedImage ? (
         <>
-          <Row
-            style={
-              isDesktopOrLaptop ? { padding: "40px" } : { padding: "20px" }
-            }
-            gutter={16}
-            align="top"
-          >
-            {/* <Col
-              xs={24}
-              md={10}
-              style={{
-                position: "relative",
-                border: "1px solid #d9d9d9",
-                padding: "10px",
-                overflow:"hidden"
-              }}
-            >
-              {isImageSetupDone ? (
-                <>
-                  <Button
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      left: "10px",
-                      zIndex: 10,
-                    }}
-                    onClick={() => {
-                      const canvas = canvasRef.current;
-                      const ctx = canvas?.getContext("2d");
-                      if (!ctx || !canvas || !isImageSetupDone) return;
-
-                      const bgImg: HTMLImageElement = new Image();
-                      bgImg.crossOrigin = "anonymous";
-                      bgImg.onload = () => {
-                        canvas.width = bgImg.width;
-                        canvas.height = bgImg.height;
-                        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
-                        textSets.forEach((textSet) => {
-                          ctx.save();
-                          ctx.font = `${textSet.fontWeight} ${
-                            textSet.fontSize * 3
-                          }px ${textSet.fontFamily},sans-serif`;
-                          ctx.fillStyle = textSet.color;
-                          ctx.globalAlpha = textSet.opacity;
-                          ctx.textAlign = "center";
-                          ctx.textBaseline = "middle";
-
-                          const x = (canvas.width * (textSet.left + 50)) / 100;
-                          const y = (canvas.height * (50 - textSet.top)) / 100;
-
-                          ctx.translate(x, y);
-                          ctx.rotate((textSet.rotation * Math.PI) / 180);
-                          ctx.fillText(textSet.text, 0, 0);
-                          ctx.restore();
-                        });
-
-                        if (removedBgImageUrl) {
-                          const removedBgImg: HTMLImageElement = new Image();
-                          removedBgImg.crossOrigin = "anonymous";
-                          removedBgImg.onload = () => {
-                            ctx.drawImage(
-                              removedBgImg,
-                              0,
-                              0,
-                              canvas.width,
-                              canvas.height
-                            );
-                            setPreviewImageUrl(canvas.toDataURL("image/png"));
-                            setIsPreviewVisible(true);
-                          };
-                          removedBgImg.src = removedBgImageUrl;
-                        } else {
-                          setPreviewImageUrl(canvas.toDataURL("image/png"));
-                          setIsPreviewVisible(true);
-                        }
-                      };
-                      bgImg.src = selectedImage || "";
-                    }}
-                  >
-                    Preview
-                  </Button>
-                  <AntImage
-                    src={selectedImage}
-                    alt="Uploaded"
-                    width="100%"
-                    height="auto"
-                  />
-                </>
-              ) : (
-                <Spin />
-              )}
-
-              {isImageSetupDone &&
-                textSets.map((textSet) => (
-                  <div
-                    key={textSet.id}
-                    style={{
-                      position: "absolute",
-                      top: `${50 - textSet.top}%`,
-                      left: `${textSet.left + 50}%`,
-                      transform: `translate(-50%, -50%) rotate(${textSet.rotation}deg)`,
-                      color: textSet.color,
-                      textAlign: "center",
-                      fontSize: `${textSet.fontSize}px`,
-                      fontWeight: textSet.fontWeight,
-                      fontFamily: `${textSet.fontFamily}, sans-serif`,
-                      opacity: textSet.opacity,
-                    }}
-                  >
-                    {textSet.text}
-                  </div>
-                ))}
-            </Col> */}
-            <Col
-              xs={24}
-              md={10}
-              style={{ position: "relative", padding: "10px" }}
-            >
-              {isImageSetupDone && (
-                <Button
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "10px",
-                    zIndex: 10,
-                  }}
-                  onClick={() => {
-                    const canvas = canvasRef.current;
-                    const ctx = canvas?.getContext("2d");
-                    if (!ctx || !canvas || !isImageSetupDone) return;
-
-                    const bgImg: HTMLImageElement = new Image();
-                    bgImg.crossOrigin = "anonymous";
-                    bgImg.onload = () => {
-                      canvas.width = bgImg.width;
-                      canvas.height = bgImg.height;
-                      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
-                      textSets.forEach((textSet) => {
-                        ctx.save();
-                        ctx.font = `${textSet.fontWeight} ${
-                          textSet.fontSize * 3
-                        }px ${textSet.fontFamily},sans-serif`;
-                        ctx.fillStyle = textSet.color;
-                        ctx.globalAlpha = textSet.opacity;
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "middle";
-
-                        const x = (canvas.width * (textSet.left + 50)) / 100;
-                        const y = (canvas.height * (50 - textSet.top)) / 100;
-
-                        ctx.translate(x, y);
-                        ctx.rotate((textSet.rotation * Math.PI) / 180);
-                        ctx.fillText(textSet.text, 0, 0);
-                        ctx.restore();
-                      });
-
-                      // if (removedBgImageUrl) {
-                      //   const removedBgImg: HTMLImageElement = new Image();
-                      //   removedBgImg.crossOrigin = "anonymous";
-                      //   removedBgImg.onload = () => {
-                      //     ctx.drawImage(
-                      //       removedBgImg,
-                      //       0,
-                      //       0,
-                      //       canvas.width,
-                      //       canvas.height
-                      //     );
-                      //     setPreviewImageUrl(canvas.toDataURL("image/png"));
-                      //     setIsPreviewVisible(true);
-                      //   };
-                      //   removedBgImg.src = removedBgImageUrl;
-                      // } else {
-                        setPreviewImageUrl(canvas.toDataURL("image/png"));
-                        setIsPreviewVisible(true);
-                      // }
-                    };
-                    bgImg.src = selectedImage || "";
-                  }}
-                >
-                  Preview
-                </Button>
-              )}
+          <Row style={isDesktopOrLaptop ? { padding: "40px" } : { padding: "20px" }} gutter={16} align="top">
+            <Col xs={24} md={10} style={{ position: "relative", padding: "10px" }}>
               {isImageSetupDone ? (
                 <>
                   <img
                     src={selectedImage}
                     alt="Uploaded"
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      position: "relative",
-                    }}
+                    style={{ width: "100%", height: "auto", cursor: "pointer" }}
                   />
                   {removedBgImageUrl && (
                     <img
                       src={removedBgImageUrl}
                       alt="Removed bg"
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        zIndex: 1, // Ensures it sits above text
-                      }}
+                      style={{ width: "100%", height: "auto", position: "absolute", top: 0, left: 0, zIndex: 1, cursor: "pointer" }}
                     />
                   )}
-                  {isImageSetupDone &&
-                    textSets.map((textSet) => (
-                      <div
-                        key={textSet.id}
-                        style={{
-                          position: "absolute",
-                          top: `${50 - textSet.top}%`,
-                          left: `${textSet.left + 50}%`,
-                          transform: `translate(-50%, -50%) rotate(${textSet.rotation}deg)`,
-                          color: textSet.color,
-                          textAlign: "center",
-                          fontSize: `${textSet.fontSize}px`,
-                          fontWeight: textSet.fontWeight,
-                          fontFamily: textSet.fontFamily,
-                          opacity: textSet.opacity,
-                          zIndex: 0,
-                        }}
-                      >
-                        {textSet.text}
-                      </div>
-                    ))}
+                  {isImageSetupDone && textSets.map((textSet) => (
+                    <div key={textSet.id} style={{ position: "absolute", top: `${50 - textSet.top}%`, left: `${textSet.left + 50}%`, transform: `translate(-50%, -50%) rotate(${textSet.rotation}deg)`, color: textSet.color, textAlign: "center", fontSize: `${textSet.fontSize}px`, fontWeight: textSet.fontWeight, fontFamily: textSet.fontFamily, opacity: textSet.opacity, zIndex: 0 }}>
+                      {textSet.text}
+                    </div>
+                  ))}
                 </>
               ) : (
                 <div style={{ textAlign: "center", margin: "25px 0 0 0" }}>
@@ -472,25 +256,10 @@ const Page = () => {
                     key={textSet.id}
                     extra={
                       <>
-                        <Button
-                          type="link"
-                          onClick={() => handleShareWithImage()}
-                          style={{ marginRight: 10 }}
-                          icon={<ShareAltOutlined />}
-                        >
-                          Share
-                        </Button>
-                        <Button
-                          type="link"
-                          onClick={() => duplicateTextSet(textSet)}
-                          style={{ marginRight: 10 }}
-                        >
+                        <Button type="link" onClick={() => duplicateTextSet(textSet)} style={{ marginRight: 10 }}>
                           Duplicate
                         </Button>
-                        <Button
-                          type="link"
-                          onClick={() => removeTextSet(textSet.id)}
-                        >
+                        <Button type="link" onClick={() => removeTextSet(textSet.id)}>
                           Remove
                         </Button>
                       </>
@@ -499,8 +268,8 @@ const Page = () => {
                     <TextCustomizer
                       textSet={textSet}
                       handleAttributeChange={handleAttributeChange}
-                      removeTextSet={removeTextSet} // Add this prop
-                      duplicateTextSet={duplicateTextSet} // Add this prop
+                      removeTextSet={removeTextSet}
+                      duplicateTextSet={duplicateTextSet}
                     />
                   </Panel>
                 ))}
@@ -516,28 +285,21 @@ const Page = () => {
                 icon={<DownloadOutlined />}
                 disabled={isDownloading}
               >
-                {isDownloading
-                  ? "Downloading..."
-                  : "  Download Image with Text"}
+                {isDownloading ? "Downloading..." : "Download Image with Text"}
               </Button>
             </Col>
             {removedBgImageUrl && (
               <Col>
-                <Button
-                  onClick={downloadRemovedBgImage}
-                  icon={<DownloadOutlined />}
-                >
+                <Button onClick={downloadRemovedBgImage} icon={<DownloadOutlined />}>
                   Download Background-Removed Image
                 </Button>
               </Col>
             )}
           </Row>
           <Divider />
-          <Row justify="center" gutter={16}>
+          <Row justify="center" gutter={16} className="mb-6">
             <Col xs={24} md={10}>
-              <Title level={3} style={{ textAlign: "center" }}>
-                Original Image
-              </Title>
+              <Title level={3} style={{ textAlign: "center" }}>Original Image</Title>
               <div>
                 <AntImage
                   src={selectedImage}
@@ -549,9 +311,7 @@ const Page = () => {
               </div>
             </Col>
             <Col xs={24} md={10}>
-              <Title level={3} style={{ textAlign: "center" }}>
-                Background Removed Image
-              </Title>
+              <Title level={3} style={{ textAlign: "center" }}>Background Removed Image</Title>
               {removedBgImageUrl ? (
                 <div>
                   <AntImage
@@ -572,18 +332,9 @@ const Page = () => {
         </>
       ) : (
         <div style={{ textAlign: "center", padding: "20px" }}>
-          <Title level={5}>Upload an image to begin</Title>
+          <Title level={5}>Upload an image to begin </Title>
         </div>
       )}
-      <Modal
-        visible={isPreviewVisible}
-        onCancel={() => setIsPreviewVisible(false)}
-        footer={null}
-      >
-        {previewImageUrl && (
-          <AntImage src={previewImageUrl} alt="Preview" width="100%" />
-        )}
-      </Modal>
     </div>
   );
 };
