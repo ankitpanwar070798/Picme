@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Suspense } from "react";
 import AntDesignRegistry from "@/lib/antd-registry";
+import Script from "next/script";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,6 +28,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-MVX7DJFXQQ"></Script>
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+            window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MVX7DJFXQQ');
+          `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

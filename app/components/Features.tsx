@@ -30,9 +30,9 @@ const benefitList: BenefitsProps[] = [
   },
   {
     icon: CodeOutlined,
-    title: "Preview and Share",
+    title: "No data storing",
     description:
-      "See how your creation looks and share it with the world!",
+      "No data is stored on the server. Your images are stored only on your device.",
   },
   {
     icon: EnvironmentOutlined,
